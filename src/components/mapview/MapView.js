@@ -1,13 +1,9 @@
 import React, { Component } from 'react'
 import { withStyles } from "@material-ui/core/styles"
-import { Map, TileLayer, Marker, Popup, withLeaflet } from 'react-leaflet'
+import { Map, TileLayer, Marker, Popup } from 'react-leaflet'
 import ReactJson from 'react-json-view'
-import { ReactLeafletSearch } from 'react-leaflet-search'
 import ActionPackage from '../common/ActionPackage'
 var _ = require('lodash'); 
-
-const MapSearch = withLeaflet(ReactLeafletSearch)
-
 
 const styles = theme => ({
     root: {
@@ -91,9 +87,6 @@ class MapView extends Component {
         useFlyTo={false} bounds={bounds}
         maxZoom={19}
       >
-        <MapSearch 
-          position="topleft" 
-          inputPlaceholder="search location ( or type :lat,lon )" />
         <TileLayer 
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           maxZoom={19}
