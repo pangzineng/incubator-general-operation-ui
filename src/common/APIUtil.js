@@ -1,4 +1,4 @@
-const endpoint = process.env.REACT_APP_SWAGGER_ENDPOINT || 'http://localhost:8888/v1'
+const endpoint = process.env.REACT_APP_SWAGGER_ENDPOINT
 
 export const getOne = (definition, id) => {
     return getSwagger(`${definition}/$${id}`)
