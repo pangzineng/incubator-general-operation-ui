@@ -7,7 +7,11 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import List from '@material-ui/core/List';
 import ListItemText from '@material-ui/core/ListItemText';
+import IconButton from '@material-ui/core/IconButton';
+import AddCircleIcon from '@material-ui/icons/AddCircle';
+import RemoveCircleIcon from '@material-ui/icons/RemoveCircle';
 import MenuItem from '@material-ui/core/MenuItem';
 import green from '@material-ui/core/colors/green';
 import Radio from '@material-ui/core/Radio';
@@ -34,6 +38,9 @@ const styles = theme => ({
     },
     editorGroup: {
       flexDirection: "row"
+    },
+    editorArray: {
+      flexDirection: "column"
     },
     editor: {
       width: '100%'
@@ -134,17 +141,35 @@ class Singleton extends Component {
     this.setState({[name]: value})
   }
 
-  handleChange = path => event => {
+  handleChange = (path, index) => event => {
     var {body} = this.state
     body = body ? body : {}
     _.set(body, path, event.target.value)
     this.setState({body})
-  };
+  }
 
-  buildFormEditor = (properties, body, path) => 
+  handleAddArrayItem = (k,body,vpath) => event => {
+    var {body} = this.state
+    body = body ? body : {}
+    var bvalue = _.get(body, vpath, [])
+    bvalue.push(null)
+    _.set(body, vpath, bvalue)
+    this.setState({body})
+  }
+
+  handleRemoveArrayItem = (k, vpath, j) => event => {
+    var {body} = this.state
+    body = body ? body : {}
+    var bvalue = _.get(body, vpath, [])
+    bvalue.splice(j, 1)
+    _.set(body, vpath, bvalue)
+    this.setState({body})
+  }
+
+  buildFormEditor = (properties, body, path, index) => 
     _.sortBy(_.keys(properties)).map( (k, i) => {
       const v = properties[k]
-      const vpath = `${ path ? `${path}.${k}` : k}`
+      const vpath = `${ path ? `${path}${index === undefined ? '' : `[${index}]`}.${k}` : k}`
       const {classes} = this.props
       switch (v['type']) {
         case 'object':
@@ -155,6 +180,29 @@ class Singleton extends Component {
               secondary={v['description']} />
               {this.buildFormEditor(v['properties'], body ? body[k] : "", vpath)}
             </Paper>
+        case 'array':
+          return <Paper key={i} className={classes.singleton}>
+            <ListItemText 
+              classes={{ primary: classes.group, secondary: classes.groupSecondary }}
+              primary={k}
+              secondary={v['description']} />
+            <IconButton 
+              onClick={this.handleAddArrayItem(k, body, vpath)}
+            >
+              <AddCircleIcon />
+            </IconButton>
+            <List>
+              {body && body[k] &&
+               body[k].map((bv, j) => <Paper key={j} className={classes.singleton}>
+                {this.buildFormEditor(v['items']['properties'], bv ? bv : "", vpath, j)}
+                <IconButton 
+                  onClick={this.handleRemoveArrayItem(k, vpath, j)}
+                >
+                  <RemoveCircleIcon />
+                </IconButton>
+              </Paper>)}
+            </List>
+            </Paper>
         case 'string':
         case 'number':
           return <TextField key={i}
@@ -164,7 +212,7 @@ class Singleton extends Component {
             value={body && body[k] ? body[k] : v['default'] || ""}
             id={k}
             label={k}
-            onChange={this.handleChange(vpath)}
+            onChange={this.handleChange(vpath, index)}
             placeholder={v['description']}
             helperText={_.has(v, 'enum') && v['description']}
             fullWidth>
