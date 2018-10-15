@@ -2,6 +2,9 @@ import { connect } from "react-redux"
 import { withRouter } from "react-router-dom"
 import Header from "../components/Header"
 import {
+  onSetDefinitions,
+  onSetProperties,
+  onSetUIConfig,
   onSelectDefinition,
   onSetUser,
   onSetSnacker
@@ -15,6 +18,15 @@ const mapStateToProps = ({user, definitions, selectedDefinition}) =>
 
 const mapDispatchToProps = dispatch =>
   ({
+    onSetDefinitions(definitions) {
+      dispatch(onSetDefinitions(definitions))
+    },
+    onSetProperties(properties) {
+      dispatch(onSetProperties(properties))
+    },
+    onSetUIConfig(uiConfig) {
+      dispatch(onSetUIConfig(uiConfig))
+    },
     onSelectDefinition(definition) {
       dispatch(onSelectDefinition(definition))
     },

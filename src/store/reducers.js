@@ -3,7 +3,11 @@ import C from "./constants"
 export const definitions = (state = [], action) => {
   switch (action.type) {
     case C.SET_DEFINITIONS:
-      return action.content
+      if(action.content === null) {
+        return []
+      } else {
+        return action.content
+      }
     default:
       return state
   }

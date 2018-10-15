@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Route, Switch } from "react-router-dom";
 import { withStyles } from '@material-ui/core/styles';
 import withRoot from './withRoot';
+import {HomeContainer} from "./container/HomeContainer"
 import {HeaderContainer} from "./container/HeaderContainer"
 import {ListingContainer} from "./container/ListingContainer"
 import {SnackerContainer} from "./container/SnackerContainer"
@@ -30,20 +31,13 @@ class App extends Component {
       <div className={classes.root}>
         <HeaderContainer />
         <SnackerContainer />
-        <Switch>
-
-          <Route exact path="/" render={() =>
-            <div></div>
-          }/>
-
-          <Route exact path="/d/:definition" render={() =>
-            <div className={classes.content} > 
-              <div className={classes.contentFiller} />
-              <ListingContainer />
-            </div>
-          }/>
-
-        </Switch>
+        <div className={classes.content} > 
+          <div className={classes.contentFiller} />
+          <Switch>
+            <Route exact path="/" render={HomeContainer}/>
+            <Route exact path="/d/:definition" render={ListingContainer}/>
+          </Switch>
+        </div>
       </div>
     );
   }

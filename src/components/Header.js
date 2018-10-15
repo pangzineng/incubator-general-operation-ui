@@ -16,6 +16,7 @@ import TextField from '@material-ui/core/TextField';
 import Tooltip from '@material-ui/core/Tooltip';
 import SvgIcon from '@material-ui/core/SvgIcon';
 import {realContract} from '../common/MagicUtil';
+import {loadSwagger} from "../common/SwaggerUtil";
 
 const styles = theme => ({
   appBar: {
@@ -95,11 +96,15 @@ class Header extends Component {
   }
 
   toggleLogout = () => {
-    const {onSetUser, onSetSnacker} = this.props
+    const {history, onSetUser, onSetSnacker, onSetDefinitions, onSetProperties, onSetUIConfig} = this.props
     onSetUser(null)
+    onSetDefinitions(null)
+    onSetProperties(null)
+    onSetUIConfig(null)
     onSetSnacker({openSnack: true, snackMsgType: "success", 
       snackMsg: `You are now logout`
     })
+    history.push("/")
   }
 
   toggleMenu = () => {
@@ -115,14 +120,19 @@ class Header extends Component {
 
   submitInput = () => {
     const {input} = this.state
-    const {onSetUser, onSetSnacker} = this.props
-    realContract(input).then((color) => {
-      this.setState({loginAction: false}, () => {
-        onSetSnacker({openSnack: true, snackMsgType: "success", 
-          snackMsg: `You are now login`
-        })
-        onSetUser({'userID': input, 'color': color})
-      })  
+    const {onSetUser, onSetSnacker, onSetDefinitions, onSetProperties, onSetUIConfig} = this.props
+    realContract(input).then(({color, profile}) => {
+      loadSwagger(profile).then(({definitions, properties, uiConfig}) => {
+        onSetDefinitions(definitions)
+        onSetProperties(properties)
+        onSetUIConfig(uiConfig)
+        this.setState({loginAction: false}, () => {
+          onSetSnacker({openSnack: true, snackMsgType: "success", 
+            snackMsg: `You are now login`
+          })
+          onSetUser({'userID': input, 'color': color})
+        })  
+      })
     }).catch(() => {
       onSetSnacker({openSnack: true, snackMsgType: "error", 
         snackMsg: `Nah, your account is wrong`

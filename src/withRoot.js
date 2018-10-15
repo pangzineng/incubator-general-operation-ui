@@ -2,7 +2,6 @@ import React from 'react';
 import { Provider } from "react-redux";
 import { BrowserRouter } from "react-router-dom";
 import storeFactory from "./store";
-import {loadSwagger} from "./common/SwaggerUtil";
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import purple from '@material-ui/core/colors/purple';
 import green from '@material-ui/core/colors/green';
@@ -26,7 +25,6 @@ const theme = createMuiTheme({
 });
 
 const store = storeFactory();
-loadSwagger(store);
 
 const withRoot = (Component) => {
   const WithRoot = (props) => {
