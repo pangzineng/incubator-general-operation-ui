@@ -65,3 +65,19 @@ export const deleteSwagger = (userID, path) => new Promise((resolves, rejects) =
     request.onerror = (err) => rejects(err)
     request.send()
 })
+
+export const getHTTP = (path) => new Promise((resolves, rejects) => {
+    const request = new XMLHttpRequest()
+    request.open("GET", `${endpoint}/${path}`)
+    request.onload = () =>
+      (request.status === 200) ?
+      resolves(request.response) :
+      rejects(request)
+    request.onerror = (err) => rejects(err)
+    request.send()
+})
+
+export const asyncGetHTTP = async(path) => {
+    let result = await getHTTP(path)
+    return result
+}

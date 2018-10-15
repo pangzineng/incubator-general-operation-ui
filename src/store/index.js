@@ -8,7 +8,6 @@ import {
   definitionQuery,
   snacker
 } from "./reducers"
-import {loadSwagger, loadSwaggerUI} from "../common/SwaggerUtil"
 
 const logger = store => next => action => {
     let result
@@ -27,15 +26,7 @@ const saver = store => next => action => {
     return result
 }
 
-const storeTTL = store => {
-  var doc = loadSwagger(); // INIT schema value
-  var uiConfig = loadSwaggerUI();
-  var empty = {}; // RESET session value
-  Object.assign(store, doc, uiConfig, empty);
-  return store;
-}
-
-const storeFactory = () =>
+const storeFactory = () => 
   createStore(
     combineReducers({
       definitions,
@@ -46,7 +37,7 @@ const storeFactory = () =>
       definitionQuery,
       snacker
     }),
-    storeTTL(JSON.parse(localStorage["realpixel-store"] || "{}")),
+    {}, // RESET session everytime
     applyMiddleware(logger, saver)
   )
 

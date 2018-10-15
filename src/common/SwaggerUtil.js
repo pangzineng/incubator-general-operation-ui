@@ -1,34 +1,46 @@
-var yaml = require("js-yaml");
+import {asyncGetHTTP} from './APIUtil';
+import {
+  onSetDefinitions,
+  onSetProperties,
+  onSetUIConfig
+} from "../store/actions"
 var _ = require('lodash');
 
-const swagger = process.env.REACT_APP_SWAGGER_SPEC
-
-export const loadSwagger = () => {
-    var definitions = []
-    var properties = {}
-    try {
-        var doc = yaml.safeLoad(swagger);
-        _.forOwn(doc.definitions, (v,k) => {
-            definitions.push({'key':k, 'description':v['description']});
-            _.forOwn(v.properties, (pv,pk) => {
-                if (!pk.startsWith('_')){
-                    _.set(properties, `${k}.${pk}`, pv);
-                }
-            });
-        });
-      } catch (e) {
-        console.log('loadSwagger error', e);
-    }
-    return {"definitions": definitions, "properties": properties};
+const pickRef = (ref, swagger) => {
+  var definition = _.get(swagger, ref.replace('#/','').replace('/','.'))
+  definition.properties = combineRef(definition.properties, swagger)
+  definition.type = 'object'
+  return definition
 }
 
-const swaggerUI = process.env.REACT_APP_SWAGGER_UI
+const combineRef = (properties, swagger) => {
+  return _.reduce(_.keys(properties), (obj, k) => {
+    obj[k] = _.has(properties, `${k}.$ref`) ? pickRef(properties[k]['$ref'], swagger) : properties[k]
+    return obj
+  }, {})
+}
 
-export const loadSwaggerUI = () => {
-  try {
-    var doc = yaml.safeLoad(swaggerUI)
-    return {'uiConfig': doc}
-  } catch (e) {
-    console.log('loadSwaggerUI error' , e)
-  }
+const removeHide = (obj) => {
+  return _.pick(obj, _.keys(obj).filter(k => !k.startsWith('_')))
+}
+
+const createDefaultUIConfig = (properties) => {
+  return _.reduce(_.keys(properties), (obj, k) => {
+    obj[k] = { map: {enable: false}, oin: {enable: false}, chart: {enable: false} }
+    return obj
+  }, {})
+}
+
+export const loadSwagger = async(store) => {
+  const v = await asyncGetHTTP(`swagger.json`)
+  const swagger = JSON.parse(v)
+  var definitions = []
+  var properties = {}
+  swagger.tags.map(tag => tag.name).forEach(tag => {
+    definitions.push({'key': tag, 'description': swagger['definitions'][tag]['description']})
+    properties[tag] = combineRef(removeHide(swagger['definitions'][tag]['properties']), swagger)
+  })
+  store.dispatch(onSetDefinitions(definitions))
+  store.dispatch(onSetProperties(properties))
+  store.dispatch(onSetUIConfig(createDefaultUIConfig(properties)))
 }
