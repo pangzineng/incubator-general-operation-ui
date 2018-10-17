@@ -1,23 +1,21 @@
-const endpoint = process.env.REACT_APP_SWAGGER_ENDPOINT || 'http://localhost:8888/v1'
-
-export const getOne = (definition, id) => {
-    return getSwagger(`${definition}/$${id}`)
+export const getOne = (endpoint, definition, id) => {
+    return getSwagger(endpoint, `${definition}/$${id}`)
 }
 
-export const getAll = (definition, offset, limit, sort, order, queryStr) => {
-    return getSwagger(definition, 
+export const getAll = (endpoint, definition, offset, limit, sort, order, queryStr) => {
+    return getSwagger(endpoint, definition, 
         `${queryStr ? `q=${encodeURIComponent(queryStr)}&`:""}offset=${offset}&limit=${limit}&sort=${sort}&order=${order}`)
 }
 
-export const postOne = (userID, definition, id, body) => {
-    return id ? patchSwagger(userID, `${definition}/$${id}`, body) : postSwagger(userID, definition, body)
+export const postOne = (endpoint, userID, definition, id, body) => {
+    return id ? patchSwagger(endpoint, userID, `${definition}/$${id}`, body) : postSwagger(endpoint, userID, definition, body)
 }
 
-export const deleteMany = (userID, definition, selected) => {
-    return Promise.all(selected.map(id => deleteSwagger(userID, `${definition}/$${id}`)))
+export const deleteMany = (endpoint, userID, definition, selected) => {
+    return Promise.all(selected.map(id => deleteSwagger(endpoint, userID, `${definition}/$${id}`)))
 }
 
-export const getSwagger = (path, params) => new Promise((resolves, rejects) => {
+export const getSwagger = (endpoint, path, params) => new Promise((resolves, rejects) => {
     const request = new XMLHttpRequest()
     request.open("GET", `${endpoint}/${path}${params ? `?${params}` : ''}`)
     request.onload = () =>
@@ -28,7 +26,7 @@ export const getSwagger = (path, params) => new Promise((resolves, rejects) => {
     request.send()
 })
 
-export const postSwagger = (userID, path, body) => new Promise((resolves, rejects) => {
+export const postSwagger = (endpoint, userID, path, body) => new Promise((resolves, rejects) => {
     const request = new XMLHttpRequest()
     request.open("POST", `${endpoint}/${path}`)
     request.setRequestHeader("Content-type", "application/json; charset=utf-8")
@@ -41,7 +39,7 @@ export const postSwagger = (userID, path, body) => new Promise((resolves, reject
     request.send(JSON.stringify(body))
 })
 
-export const patchSwagger = (userID, path, body) => new Promise((resolves, rejects) => {
+export const patchSwagger = (endpoint, userID, path, body) => new Promise((resolves, rejects) => {
     const request = new XMLHttpRequest()
     request.open("PATCH", `${endpoint}/${path}`)
     request.setRequestHeader("Content-type", "application/json; charset=utf-8")
@@ -54,7 +52,7 @@ export const patchSwagger = (userID, path, body) => new Promise((resolves, rejec
     request.send(JSON.stringify(body))
 })
 
-export const deleteSwagger = (userID, path) => new Promise((resolves, rejects) => {
+export const deleteSwagger = (endpoint, userID, path) => new Promise((resolves, rejects) => {
     const request = new XMLHttpRequest()
     request.open("DELETE", `${endpoint}/${path}`)
     request.setRequestHeader("x-api-user", userID || 'anonymous')
@@ -66,9 +64,9 @@ export const deleteSwagger = (userID, path) => new Promise((resolves, rejects) =
     request.send()
 })
 
-export const getHTTP = (path) => new Promise((resolves, rejects) => {
+export const getHTTP = (endpoint, path) => new Promise((resolves, rejects) => {
     const request = new XMLHttpRequest()
-    request.open("GET", path)
+    request.open("GET", `${endpoint}/${path}`)
     request.onload = () =>
       (request.status === 200) ?
       resolves(request.response) :

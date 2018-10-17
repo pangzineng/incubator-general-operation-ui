@@ -11,6 +11,7 @@ const mapStateToProps = ({user, selectedDefinition, properties, definitionQuery}
     selectedDefinition: selectedDefinition,
     selectedDefinitionProperty: properties[selectedDefinition],
     selectedDefinitionQuery: definitionQuery[selectedDefinition],
+    endpoint: user.profile ? user.profile.endpoint : null,
     uiConfig: user.profile ? user.profile.access[selectedDefinition] : null
   })
 

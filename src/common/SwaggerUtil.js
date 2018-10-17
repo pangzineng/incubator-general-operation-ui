@@ -20,7 +20,7 @@ const removeHide = (obj) => {
 }
 
 export const loadSwagger = (profile) => {
-  return getHTTP(`${profile.endpoint}/swagger.json`).then(
+  return getHTTP(profile.endpoint, 'swagger.json').then(
     (v) => {
       const swagger = JSON.parse(v)
       if (swagger.info.title !== profile.name){

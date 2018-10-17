@@ -59,9 +59,9 @@ class Listing extends React.Component {
   }
 
   refreshData = (offset=0, limit=5, sort=null, order=1, queryStr=null) => {
-    const {selectedDefinition, selectedDefinitionProperty, selectedDefinitionQuery, onSetSnacker} = this.props
+    const {endpoint, selectedDefinition, selectedDefinitionProperty, selectedDefinitionQuery, onSetSnacker} = this.props
     const orderBy = _.has(selectedDefinitionProperty, sort) ? sort : _.keys(selectedDefinitionProperty)[0]
-    getAll(selectedDefinition, offset, limit, orderBy, order, 
+    getAll(endpoint, selectedDefinition, offset, limit, orderBy, order, 
       queryStr ? queryStr : selectedDefinitionQuery ? selectedDefinitionQuery.query : null).then(
       (response) => {
         const res = JSON.parse(response)
@@ -75,8 +75,8 @@ class Listing extends React.Component {
   }
 
   deleteData = (selected) => {
-    const {userID, selectedDefinition, onSetSnacker} = this.props;
-    deleteMany(userID, selectedDefinition, selected).then(
+    const {endpoint, userID, selectedDefinition, onSetSnacker} = this.props;
+    deleteMany(endpoint, userID, selectedDefinition, selected).then(
       () => {
         onSetSnacker({openSnack: true, snackMsgType: "success", 
           snackMsg: `Deleted ${selectedDefinition}: ${selected}`
@@ -125,12 +125,13 @@ class Listing extends React.Component {
   }
 
   render() {
-    const { classes, selectedDefinition, selectedDefinitionProperty, selectedDefinitionQuery, onSetDefinitionQuery, userID, uiConfig } = this.props;
+    const { classes, endpoint, selectedDefinition, selectedDefinitionProperty, selectedDefinitionQuery, onSetDefinitionQuery, userID, uiConfig } = this.props;
     const { data, totalData, openedSingleton, opened, mapViewOpenFlag, chartViewOpenFlag } = this.state;
     return (uiConfig ? [
       <Singleton key={1}
         userID={userID}
         opened={opened}
+        endpoint={endpoint}
         definition={selectedDefinition}
         properties={selectedDefinitionProperty} 
         singleton={openedSingleton} 

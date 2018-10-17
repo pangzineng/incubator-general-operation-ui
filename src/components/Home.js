@@ -37,13 +37,13 @@ class Home extends Component {
             Connection Status:
           </Typography>
           <Typography variant="body1">
-            - Last Attend: {new Date().toLocaleString()}
+            - <i>Last Attempt:</i> {new Date().toLocaleString()}
           </Typography>
           <Typography variant="body1" paragraph>
-            - Successful: {profile.active ? 'YES' : 'NO'}
+            - <i>Result:</i> {profile.active ? 'Connected' : 'Disconnected'}
           </Typography>
           <Typography variant="subtitle1">
-            Connection Profile:
+            Service Profile:
           </Typography>
           <ReactJson 
             src={profile}

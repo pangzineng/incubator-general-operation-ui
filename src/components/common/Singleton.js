@@ -103,9 +103,9 @@ class Singleton extends Component {
 
   handleSubmit = (event) => {
     event.preventDefault()
-    const {definition, userID, onClose, onSetSnacker} = this.props
+    const {endpoint, definition, userID, onClose, onSetSnacker} = this.props
     const {newFlag, body} = this.state
-    postOne(userID, definition, newFlag ? null : body['_id'], body).then(
+    postOne(endpoint, userID, definition, newFlag ? null : body['_id'], body).then(
         (v) => {
           onSetSnacker({openSnack: true, snackMsgType: "success", 
             snackMsg: newFlag?`New ${definition} is created`:`${definition} is successfully updated`
@@ -121,10 +121,10 @@ class Singleton extends Component {
   }
 
   fetchData = () => {
-    const {definition, onSetSnacker} = this.props 
+    const {endpoint, definition, onSetSnacker} = this.props 
     const {newFlag, objectId} = this.state
     if (!newFlag) {
-      getOne(definition, objectId).then(
+      getOne(endpoint, definition, objectId).then(
         (v) => {
           this.setState({body: JSON.parse(v)})
         },
