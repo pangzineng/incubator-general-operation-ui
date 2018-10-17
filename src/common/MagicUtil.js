@@ -111,16 +111,33 @@ const serviceProfiles = [{
       }
     }
   }
+},{
+  name: 'AdBoardClientScheduler',
+  description: 'Manage the Ad schedule on AdBoard',
+  endpoint: 'http://localhost:8888/v1',
+  access: {
+    "schedule": {
+      "map": {
+        "enable": false
+      },
+      "oin": {
+        "enable": false
+      },
+      "chart": {
+        "enable": false
+      }
+    }
+  }
 }
 ]
 
 const magicProfile = {
   '#69526d': serviceProfiles[0],
   '#FFFFFF': serviceProfiles[1],
-  '#F8BBD0': serviceProfiles[0],
-  '#B71C1C': serviceProfiles[1],
-  '#4b72ff': serviceProfiles[0],
-  '#FDD835': serviceProfiles[1]
+  '#F8BBD0': serviceProfiles[2],
+  '#B71C1C': serviceProfiles[0],
+  '#4b72ff': serviceProfiles[1],
+  '#FDD835': serviceProfiles[2]
 }
 
 export const realContract = (spell) => {
