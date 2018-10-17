@@ -10,7 +10,8 @@ const realSpells = {
 }
 
 const serviceProfiles = [{
-  name: 'Preview Reality Operation',
+  name: 'PreviewReality',
+  description: 'Manage and operate the update and preview of Ad on preview mode',
   endpoint: 'http://localhost:8888/v1',
   access: {
     "ad": {
@@ -51,7 +52,8 @@ const serviceProfiles = [{
     }
   }
 },{
-  name: 'Real Pixel Opeartion',
+  name: 'RealPixel',
+  description: 'Manage and operate the realpixel camera setup and data processing',
   endpoint: 'http://localhost:8888/v1',
   access: {
     "analysis": {
@@ -116,8 +118,6 @@ const magicProfile = {
   '#69526d': serviceProfiles[0],
   '#FFFFFF': serviceProfiles[1],
   '#F8BBD0': serviceProfiles[0],
-  '#69526d': serviceProfiles[1],
-  '#FFFFFF': serviceProfiles[0],
   '#B71C1C': serviceProfiles[1],
   '#4b72ff': serviceProfiles[0],
   '#FDD835': serviceProfiles[1]

@@ -52,21 +52,6 @@ export const user = (state = {}, action) => {
   }
 }
 
-export const uiConfig = (state = {}, action) => {
-  switch (action.type) {
-    case C.SET_UICONFIG: {
-      if(action.content === null) {
-        return {}
-      } else {
-        const nstate = Object.assign({}, state, action.content)
-        return nstate
-      }
-    }
-    default :
-      return state
-  }
-}
-
 export const snacker = (state = {}, action) => {
   switch(action.type) {
     case C.SET_SNACKER:

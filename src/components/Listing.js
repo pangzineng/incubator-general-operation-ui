@@ -127,7 +127,7 @@ class Listing extends React.Component {
   render() {
     const { classes, selectedDefinition, selectedDefinitionProperty, selectedDefinitionQuery, onSetDefinitionQuery, userID, uiConfig } = this.props;
     const { data, totalData, openedSingleton, opened, mapViewOpenFlag, chartViewOpenFlag } = this.state;
-    return ([
+    return (uiConfig ? [
       <Singleton key={1}
         userID={userID}
         opened={opened}
@@ -183,7 +183,7 @@ class Listing extends React.Component {
         toggleChartView={this.toggleChartView}
         refreshData={this.refreshData}
       />
-    ]);
+    ]: null);
   }
 }
 

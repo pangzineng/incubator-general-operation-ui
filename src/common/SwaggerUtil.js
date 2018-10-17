@@ -23,13 +23,16 @@ export const loadSwagger = (profile) => {
   return getHTTP(`${profile.endpoint}/swagger.json`).then(
     (v) => {
       const swagger = JSON.parse(v)
+      if (swagger.info.title !== profile.name){
+        return {}
+      }
       var definitions = []
       var properties = {}
       swagger.tags.map(tag => tag.name).filter(tag => _.has(profile.access, tag)).forEach(tag => {
         definitions.push({'key': tag, 'description': swagger['definitions'][tag]['description']})
         properties[tag] = combineRef(removeHide(swagger['definitions'][tag]['properties']), swagger)
       })
-      return {definitions: definitions, properties: properties, uiConfig: profile.access}
+      return {definitions, properties}
     }
   )
 }

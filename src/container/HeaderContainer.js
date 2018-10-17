@@ -4,7 +4,6 @@ import Header from "../components/Header"
 import {
   onSetDefinitions,
   onSetProperties,
-  onSetUIConfig,
   onSelectDefinition,
   onSetUser,
   onSetSnacker
@@ -23,9 +22,6 @@ const mapDispatchToProps = dispatch =>
     },
     onSetProperties(properties) {
       dispatch(onSetProperties(properties))
-    },
-    onSetUIConfig(uiConfig) {
-      dispatch(onSetUIConfig(uiConfig))
     },
     onSelectDefinition(definition) {
       dispatch(onSelectDefinition(definition))

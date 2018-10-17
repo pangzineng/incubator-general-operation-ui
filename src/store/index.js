@@ -4,7 +4,6 @@ import {
   selectedDefinition,
   user,
   properties,
-  uiConfig,
   definitionQuery,
   snacker
 } from "./reducers"
@@ -33,7 +32,6 @@ const storeFactory = () =>
       selectedDefinition,
       user,
       properties,
-      uiConfig,
       definitionQuery,
       snacker
     }),

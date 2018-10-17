@@ -24,12 +24,6 @@ export const onSetUser = user =>
     content: user
   })
   
-export const onSetUIConfig = uiConfig =>
-  ({
-    type: C.SET_UICONFIG,
-    content: uiConfig
-  })
-
 export const onSetSnacker = snacker =>
   ({
     type: C.SET_SNACKER,

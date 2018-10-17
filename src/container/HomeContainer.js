@@ -1,19 +1,13 @@
 import { connect } from "react-redux"
 import { withRouter } from "react-router-dom"
 import Home from "../components/Home"
-import {
-  onSetUIConfig
-} from "../store/actions"
-const mapStateToProps = ({uiConfig}) =>
+const mapStateToProps = ({user}) =>
   ({
-    uiConfig: uiConfig
+    profile: user.profile
   })
 
 const mapDispatchToProps = dispatch =>
   ({
-    onSetUIConfig(uiConfig) {
-      dispatch(onSetUIConfig(uiConfig))
-    },
   })
 
 

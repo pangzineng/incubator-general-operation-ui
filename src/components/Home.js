@@ -1,42 +1,61 @@
 import React, { Component } from "react"
 import { withStyles } from "@material-ui/core/styles"
-import ReactJson from 'react-json-view';
+import Card from '@material-ui/core/Card';
+import CardHeader from '@material-ui/core/CardHeader';
+import CardContent from '@material-ui/core/CardContent';
+import PowerOnIcon from '@material-ui/icons/Power';
+import PowerOffIcon from '@material-ui/icons/PowerOff';
+import Typography from '@material-ui/core/Typography';
+import green from '@material-ui/core/colors/green';
+import grey from '@material-ui/core/colors/grey';
+import ReactJson from "react-json-view";
+
 var _ = require('lodash');
 
 const styles = theme => ({
+  hl: {
+    color: green[500]
+  },
+  ll: {
+    color: grey[500]
+  }
 });
 
 class Home extends Component {
 
-  constructor(props){
-    super(props)
-    this.state = {
-      config: props.uiConfig
-    }
-  }
-
-  componentDidUpdate(prevProps){
-    if (!_.isEqual(prevProps.uiConfig, this.props.uiConfig)) {
-      this.setState({config: this.props.uiConfig})
-    }
-  }
-
-  handleChange = (key, value) => {
-    this.setState({key: value})
-  }
-
   render() {
-    const {config} = this.state
+    const {classes, profile} = this.props
     return (
-      <ReactJson 
-        src={config}
-        collapseStringsAfterLength={20}
-        name={false}
-        enableClipboard={false}
-        displayObjectSize={false}
-        displayDataTypes={false}
-        onEdit={data => this.handleChange('config', data.updated_src)}
-      />
+      profile ? <Card>
+        <CardHeader
+          action={profile.active ? <PowerOnIcon className={classes.hl}/> : <PowerOffIcon className={classes.ll}/>}
+          title={_.startCase(profile.name)}
+          subheader={profile.description}
+        />
+        <CardContent>
+          <Typography variant="subheading">
+            Connection Status:
+          </Typography>
+          <Typography variant="body1">
+            - Last Attend: {new Date().toLocaleString()}
+          </Typography>
+          <Typography variant="body1" paragraph>
+            - Successful: {profile.active ? 'YES' : 'NO'}
+          </Typography>
+          <Typography variant="subheading">
+            Connection Profile:
+          </Typography>
+          <ReactJson 
+            src={profile}
+            collapseStringsAfterLength={20}
+            name={false}
+            collapsed={true}
+            enableClipboard={false}
+            displayObjectSize={false}
+            displayDataTypes={false}
+          />
+        </CardContent>
+      </Card> : null
     )
   }
 }

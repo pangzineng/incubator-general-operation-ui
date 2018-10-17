@@ -96,11 +96,10 @@ class Header extends Component {
   }
 
   toggleLogout = () => {
-    const {history, onSetUser, onSetSnacker, onSetDefinitions, onSetProperties, onSetUIConfig} = this.props
+    const {history, onSetUser, onSetSnacker, onSetDefinitions, onSetProperties} = this.props
     onSetUser(null)
     onSetDefinitions(null)
     onSetProperties(null)
-    onSetUIConfig(null)
     onSetSnacker({openSnack: true, snackMsgType: "success", 
       snackMsg: `You are now logout`
     })
@@ -120,18 +119,21 @@ class Header extends Component {
 
   submitInput = () => {
     const {input} = this.state
-    const {onSetUser, onSetSnacker, onSetDefinitions, onSetProperties, onSetUIConfig} = this.props
+    const {onSetUser, onSetSnacker, onSetDefinitions, onSetProperties} = this.props
     realContract(input).then(({color, profile}) => {
-      loadSwagger(profile).then(({definitions, properties, uiConfig}) => {
-        onSetDefinitions(definitions)
-        onSetProperties(properties)
-        onSetUIConfig(uiConfig)
-        this.setState({loginAction: false}, () => {
-          onSetSnacker({openSnack: true, snackMsgType: "success", 
-            snackMsg: `You are now login`
+      loadSwagger(profile).then(({definitions, properties}) => {
+        if (definitions && properties) {
+          onSetDefinitions(definitions)
+          onSetProperties(properties)
+          onSetUser({'userID': input, color, profile: {...profile, active: true}})
+          this.setState({loginAction: false}, () => {
+            onSetSnacker({openSnack: true, snackMsgType: "success", 
+              snackMsg: `You are now login`
+            })
           })
-          onSetUser({'userID': input, 'color': color})
-        })  
+        } else {
+          onSetUser({'userID': input, color, profile: {...profile, active: false}})
+        }
       })
     }).catch(() => {
       onSetSnacker({openSnack: true, snackMsgType: "error", 

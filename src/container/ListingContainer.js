@@ -5,13 +5,13 @@ import {
   onSetSnacker, onSetDefinitionQuery
 } from "../store/actions"
 
-const mapStateToProps = ({user, selectedDefinition, properties, definitionQuery, uiConfig}) =>
+const mapStateToProps = ({user, selectedDefinition, properties, definitionQuery}) =>
   ({
-    userID: user['userID'],
+    userID: user.userID,
     selectedDefinition: selectedDefinition,
     selectedDefinitionProperty: properties[selectedDefinition],
     selectedDefinitionQuery: definitionQuery[selectedDefinition],
-    uiConfig: uiConfig[selectedDefinition]
+    uiConfig: user.profile ? user.profile.access[selectedDefinition] : null
   })
 
 const mapDispatchToProps = dispatch =>
