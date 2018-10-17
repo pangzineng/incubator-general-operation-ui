@@ -313,7 +313,7 @@ class EnhancedTableToolbar extends Component {
             <div className={classes.actions}>
               {
                 selected.length > 0 ?
-                <Typography color="inherit" variant="subheading">
+                <Typography color="inherit" variant="subtitle1">
                   {selected.length > 1 ? `${selected.length} selected`: selected[0]} 
                 </Typography> : 
                 (<div style={{display:'flex'}}>

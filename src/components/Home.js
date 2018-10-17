@@ -33,7 +33,7 @@ class Home extends Component {
           subheader={profile.description}
         />
         <CardContent>
-          <Typography variant="subheading">
+          <Typography variant="subtitle1">
             Connection Status:
           </Typography>
           <Typography variant="body1">
@@ -42,7 +42,7 @@ class Home extends Component {
           <Typography variant="body1" paragraph>
             - Successful: {profile.active ? 'YES' : 'NO'}
           </Typography>
-          <Typography variant="subheading">
+          <Typography variant="subtitle1">
             Connection Profile:
           </Typography>
           <ReactJson 
