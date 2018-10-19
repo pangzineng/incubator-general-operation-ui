@@ -4,15 +4,16 @@ import Listing from "../components/Listing"
 import {
   onSetSnacker, onSetDefinitionQuery
 } from "../store/actions"
+var _ = require('lodash')
 
 const mapStateToProps = ({user, selectedDefinition, properties, definitionQuery}) =>
   ({
-    userID: user.userID,
+    userID: user._id,
     selectedDefinition: selectedDefinition,
     selectedDefinitionProperty: properties[selectedDefinition],
     selectedDefinitionQuery: definitionQuery[selectedDefinition],
-    endpoint: user.profile ? user.profile.endpoint : null,
-    uiConfig: user.profile ? user.profile.access[selectedDefinition] : null
+    endpoint: user.activeProfile ? _.find(user.profiles, {name: user.activeProfile}).endpoint : null,
+    uiConfig: user.activeProfile ? _.find(user.profiles, {name: user.activeProfile}).access[selectedDefinition] : null
   })
 
 const mapDispatchToProps = dispatch =>

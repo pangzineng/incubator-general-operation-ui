@@ -14,8 +14,12 @@ import green from '@material-ui/core/colors/green';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import Tooltip from '@material-ui/core/Tooltip';
-import {realContract} from '../common/MagicUtil';
-import {loadSwagger} from "../common/SwaggerUtil";
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import {accountsAction} from '../common/Authentication';
 import { Typography } from "@material-ui/core";
 var _ = require('lodash');
 
@@ -34,6 +38,10 @@ const styles = theme => ({
   },
   btn: {
     marginRight: theme.spacing.unit
+  },
+  hightlightBtn: {
+    marginRight: theme.spacing.unit,
+    background: green[500]
   },
   form: {
     display: 'inline-flex'
@@ -65,6 +73,9 @@ class Header extends Component {
     }
     this.state = {
       menuOpened: true,
+      username: null,
+      password: null,
+      logoutDialogOpen: false,
       loginAction: false
     }
   }
@@ -87,7 +98,11 @@ class Header extends Component {
     this.setState({loginAction: !loginAction})
   }
 
-  toggleLogout = () => {
+  toggleLogoutDialog = () => {
+    this.setState(prevState => ({logoutDialogOpen: !prevState.logoutDialogOpen}))
+  }
+
+  handleConfirmLogout = () => {
     const {history, onSetUser, onSetSnacker, onSetDefinitions, onSetProperties} = this.props
     onSetUser(null)
     onSetDefinitions(null)
@@ -95,13 +110,14 @@ class Header extends Component {
     onSetSnacker({openSnack: true, snackMsgType: "success", 
       snackMsg: `You are now logout`
     })
-    this.setState({input: null})
-    history.push("/")
+    this.toggleLogoutDialog()
+    if(history.location.pathname !== '/') {
+      history.push("/")
+    }
   }
 
   toggleMenu = () => {
-    const {menuOpened} = this.state
-    this.setState({menuOpened: !menuOpened})
+    this.setState(prevState => ({menuOpened: !prevState.menuOpened}))
   }
 
   handleChange = name => event => {
@@ -110,37 +126,46 @@ class Header extends Component {
     });
   };
 
-  submitInput = () => {
-    const {input} = this.state
-    const {onSetUser, onSetSnacker, onSetDefinitions, onSetProperties} = this.props
-    realContract(input).then(({color, profile}) => {
-      loadSwagger(profile).then(({definitions, properties}) => {
-        if (definitions && properties) {
-          onSetDefinitions(definitions)
-          onSetProperties(properties)
-          onSetUser({'userID': input, color, profile: {...profile, active: true}})
-          this.setState({loginAction: false, input: null}, () => {
-            onSetSnacker({openSnack: true, snackMsgType: "success", 
-              snackMsg: `You are now login`
-            })
-          })
-        } else {
-          onSetUser({'userID': input, color, profile: {...profile, active: false}})
-        }
-      })
-    }).catch(() => {
-      onSetSnacker({openSnack: true, snackMsgType: "error", 
-        snackMsg: `Nah, your account is wrong`
-      })
-      this.setState({loginAction: false, input: null}, () => {
-        onSetUser(null)
-      })  
-    })
+  handleRegister = () => {
+    const {username, password} = this.state
+    const {onSetSnacker} = this.props
+    accountsAction('register', {username, password}).then(
+      (v) => {
+        onSetSnacker({openSnack: true, snackMsgType: "success", 
+          snackMsg: `${v}. Please login now`
+        })
+        this.setState({username: null, password: null, loginAction: false})
+      },
+      (e) => {
+        onSetSnacker({openSnack: true, snackMsgType: "error", 
+          snackMsg: e
+        })
+      }
+    )
+  }
+
+  handleLogin = () => {
+    const {username, password} = this.state
+    const {onSetUser, onSetSnacker} = this.props
+    accountsAction('login', {username, password}).then(
+      (v) => {
+        onSetUser(JSON.parse(v))
+        onSetSnacker({openSnack: true, snackMsgType: "success", 
+          snackMsg: `You have login`
+        })
+        this.setState({username: null, password: null, loginAction: false})
+      },
+      (e) => {
+        onSetSnacker({openSnack: true, snackMsgType: "error", 
+          snackMsg: e
+        })
+      }
+    )
   }
 
   render() {
     const { classes, definitions, selectedDefinition, user } = this.props;
-    const {loginAction, menuOpened} = this.state
+    const {loginAction, username, menuOpened, logoutDialogOpen} = this.state
     return ([
       <AppBar key={1}
         position="absolute" className={classes.appBar} color="default"
@@ -153,30 +178,41 @@ class Header extends Component {
           </Tooltip>
             <div className={classes.logo} >
             <Typography variant="h6">
-              {user.profile ? _.startCase(user.profile.name) : 'General Operation UI'}
+              {user.activeProfile ? _.startCase(user.activeProfile) : 'General Operation UI'}
             </Typography>
             </div>
           {
-            user['userID'] ?
-            <Tooltip title={`You're Now Login as ${user['color']}. Click To Logout`}>
-              <Button variant="outlined" className={classes.btn} 
-                style={{backgroundColor: user['color']}}
-                onClick={() => this.toggleLogout()}>
-                {''}
+            user._id ?
+            <Tooltip title={`You're Now Login. Click To Logout`}>
+              <Button variant="outlined" className={classes.hightlightBtn} 
+                onClick={this.toggleLogoutDialog}>
+                {user.username}
               </Button> 
             </Tooltip>:
             loginAction ? 
               [<TextField key={1} className={classes.btn}
-                type="password"
-                placeholder="Enter Magic Spell"
-                onChange={this.handleChange('input')}
+                placeholder="name"
+                value={username || ''}
+                onChange={this.handleChange('username')}
               />,
-              <Button key={2} className={classes.btn}
+              <TextField key={2} className={classes.btn}
+                type="password"
+                placeholder="password"
+                onChange={this.handleChange('password')}
+              />,
+              <Button key={3} className={classes.btn}
                 type="submit"
                 variant="outlined"
-                onClick={() => this.submitInput()}
+                onClick={() => this.handleLogin()}
               >
                 Login
+              </Button>,
+              <Button key={4} className={classes.btn}
+                type="submit"
+                variant="outlined"
+                onClick={() => this.handleRegister()}
+              >
+                Register
               </Button>]:
             <Tooltip title="Click To Login">
               <Button variant="outlined" className={classes.btn} onClick={() => this.toggleLogin()}>
@@ -191,8 +227,8 @@ class Header extends Component {
         <div className={classes.toolbar} />
         <List dense className={classes.adjust}>
           <ListItem button className={classes.item}>
-            {selectedDefinition ? null :
-              <ArrowIcon className={classes.selected} />}
+            {this.props.history.location.pathname === '/' ? 
+              <ArrowIcon className={classes.selected} />: null}
             <ListItemText className={classes.item}
               primary={"Home"}
               onClick={this.handleRootClick} />
@@ -213,7 +249,26 @@ class Header extends Component {
           ]
         )}
         </List>
-      </Drawer>      
+      </Drawer>,
+      <Dialog key={3}
+        open={logoutDialogOpen}
+        onClose={this.toggleLogoutDialog}
+      >
+        <DialogTitle>{"Are you sure to logout?"}</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            By logout, you will also be disconncted from all services
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={this.toggleLogoutDialog} color="primary" autoFocus>
+            Cancel
+          </Button>
+          <Button onClick={this.handleConfirmLogout} color="primary">
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
     ])
   }
 }

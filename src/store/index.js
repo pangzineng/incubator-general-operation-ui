@@ -8,6 +8,8 @@ import {
   snacker
 } from "./reducers"
 
+const STORE_NAME = "realpixel-store"
+
 const logger = store => next => action => {
     let result
     console.groupCollapsed("dispatching", action.type)
@@ -21,9 +23,14 @@ const logger = store => next => action => {
 
 const saver = store => next => action => {
     let result = next(action)
-    localStorage["realpixel-store"] = JSON.stringify(store.getState())
+    localStorage[STORE_NAME] = JSON.stringify(store.getState())
     return result
 }
+
+const storeTTL = store => { 
+  return store // keep all store data
+} 
+
 
 const storeFactory = () => 
   createStore(
@@ -35,7 +42,7 @@ const storeFactory = () =>
       definitionQuery,
       snacker
     }),
-    {}, // RESET session everytime
+    storeTTL(JSON.parse(localStorage[STORE_NAME] || "{}")), 
     applyMiddleware(logger, saver)
   )
 
