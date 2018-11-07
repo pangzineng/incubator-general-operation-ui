@@ -103,9 +103,9 @@ class Singleton extends Component {
 
   handleSubmit = (event) => {
     event.preventDefault()
-    const {endpoint, definition, userID, onClose, onSetSnacker} = this.props
+    const {profile, definition, userID, onClose, onSetSnacker} = this.props
     const {newFlag, body} = this.state
-    postOne(endpoint, userID, definition, newFlag ? null : body['_id'], body).then(
+    postOne(profile.endpoint, userID, definition, newFlag ? null : body['_id'], body).then(
         (v) => {
           onSetSnacker({openSnack: true, snackMsgType: "success", 
             snackMsg: newFlag?`New ${definition} is created`:`${definition} is successfully updated`
@@ -121,10 +121,10 @@ class Singleton extends Component {
   }
 
   fetchData = () => {
-    const {endpoint, definition, onSetSnacker} = this.props 
+    const {profile, definition, onSetSnacker} = this.props 
     const {newFlag, objectId} = this.state
     if (!newFlag) {
-      getOne(endpoint, definition, objectId).then(
+      getOne(profile.endpoint, definition, objectId).then(
         (v) => {
           this.setState({body: JSON.parse(v)})
         },
@@ -141,14 +141,14 @@ class Singleton extends Component {
     this.setState({[name]: value})
   }
 
-  handleChange = (path, index) => event => {
+  handleValueChange = (path, value) => {
     var {body} = this.state
     body = body ? body : {}
-    _.set(body, path, event.target.value)
+    _.set(body, path, value)
     this.setState({body})
   }
 
-  handleAddArrayItem = (k,body,vpath) => event => {
+  handleAddArrayItem = (vpath) => event => {
     var {body} = this.state
     body = body ? body : {}
     var bvalue = _.get(body, vpath, [])
@@ -157,7 +157,7 @@ class Singleton extends Component {
     this.setState({body})
   }
 
-  handleRemoveArrayItem = (k, vpath, j) => event => {
+  handleRemoveArrayItem = (vpath, j) => event => {
     var {body} = this.state
     body = body ? body : {}
     var bvalue = _.get(body, vpath, [])
@@ -187,7 +187,7 @@ class Singleton extends Component {
               primary={k}
               secondary={v['description']} />
             <IconButton 
-              onClick={this.handleAddArrayItem(k, body, vpath)}
+              onClick={this.handleAddArrayItem(vpath)}
             >
               <AddCircleIcon />
             </IconButton>
@@ -196,7 +196,7 @@ class Singleton extends Component {
                body[k].map((bv, j) => <Paper key={j} className={classes.singleton}>
                 {this.buildFormEditor(v['items']['properties'], bv ? bv : "", vpath, j)}
                 <IconButton 
-                  onClick={this.handleRemoveArrayItem(k, vpath, j)}
+                  onClick={this.handleRemoveArrayItem(vpath, j)}
                 >
                   <RemoveCircleIcon />
                 </IconButton>
@@ -212,7 +212,7 @@ class Singleton extends Component {
             value={body && body[k] ? body[k] : v['default'] || ""}
             id={k}
             label={k}
-            onChange={this.handleChange(vpath, index)}
+            onChange={event => this.handleValueChange(vpath, event.target.value)}
             placeholder={v['description']}
             helperText={_.has(v, 'enum') && v['description']}
             fullWidth>

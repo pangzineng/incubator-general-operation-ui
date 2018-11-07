@@ -10,7 +10,14 @@ const pickRef = (ref, swagger) => {
 
 const combineRef = (properties, swagger) => {
   return _.reduce(_.keys(properties), (obj, k) => {
-    obj[k] = _.has(properties, `${k}.$ref`) ? pickRef(properties[k]['$ref'], swagger) : properties[k]
+    if (_.has(properties, `${k}.$ref`)){
+      obj[k] = pickRef(properties[k]['$ref'], swagger)
+    } else if (_.has(properties, `${k}.items.$ref`)){
+      obj[k] = properties[k]
+      obj[k]['items'] = pickRef(properties[k]['items']['$ref'], swagger)
+    } else {
+      obj[k] = properties[k]
+    }
     return obj
   }, {})
 }
@@ -20,7 +27,7 @@ const removeHide = (obj) => {
 }
 
 export const loadSwagger = (profile) => {
-  return getHTTP(profile.endpoint, 'swagger.json').then(
+  return getHTTP(`${profile.endpoint}/swagger.json`).then(
     (v) => {
       const swagger = JSON.parse(v)
       if (swagger.info.title !== profile.name){

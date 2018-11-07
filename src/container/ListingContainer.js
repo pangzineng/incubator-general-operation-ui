@@ -12,8 +12,7 @@ const mapStateToProps = ({user, selectedDefinition, properties, definitionQuery}
     selectedDefinition: selectedDefinition,
     selectedDefinitionProperty: properties[selectedDefinition],
     selectedDefinitionQuery: definitionQuery[selectedDefinition],
-    endpoint: user.activeProfile ? _.find(user.profiles, {name: user.activeProfile}).endpoint : null,
-    uiConfig: user.activeProfile ? _.find(user.profiles, {name: user.activeProfile}).access[selectedDefinition] : null
+    profile: user.activeProfile ? _.find(user.profiles, {name: user.activeProfile}) : null
   })
 
 const mapDispatchToProps = dispatch =>

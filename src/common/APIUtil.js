@@ -64,13 +64,24 @@ export const deleteSwagger = (endpoint, userID, path) => new Promise((resolves, 
     request.send()
 })
 
-export const getHTTP = (endpoint, path) => new Promise((resolves, rejects) => {
+export const getHTTP = (url) => new Promise((resolves, rejects) => {
     const request = new XMLHttpRequest()
-    request.open("GET", `${endpoint}/${path}`)
+    request.open("GET", url)
     request.onload = () =>
       (request.status === 200) ?
       resolves(request.response) :
       rejects(request)
     request.onerror = (err) => rejects(err)
     request.send()
+})
+
+export const putHTTP = (url, body) => new Promise((resolves, rejects) => {
+    const request = new XMLHttpRequest()
+    request.open("PUT", url, true)
+    request.onload = () =>
+      (request.status === 200) ?
+      resolves(request.response) :
+      rejects(request)
+    request.onerror = (err) => rejects(err)
+    request.send(body)
 })

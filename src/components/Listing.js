@@ -59,9 +59,9 @@ class Listing extends React.Component {
   }
 
   refreshData = (offset=0, limit=5, sort=null, order=1, queryStr=null) => {
-    const {endpoint, selectedDefinition, selectedDefinitionProperty, selectedDefinitionQuery, onSetSnacker} = this.props
+    const {profile, selectedDefinition, selectedDefinitionProperty, selectedDefinitionQuery, onSetSnacker} = this.props
     const orderBy = _.has(selectedDefinitionProperty, sort) ? sort : _.keys(selectedDefinitionProperty)[0]
-    getAll(endpoint, selectedDefinition, offset, limit, orderBy, order, 
+    getAll(profile.endpoint, selectedDefinition, offset, limit, orderBy, order, 
       queryStr ? queryStr : selectedDefinitionQuery ? selectedDefinitionQuery.query : null).then(
       (response) => {
         const res = JSON.parse(response)
@@ -75,8 +75,8 @@ class Listing extends React.Component {
   }
 
   deleteData = (selected) => {
-    const {endpoint, userID, selectedDefinition, onSetSnacker} = this.props;
-    deleteMany(endpoint, userID, selectedDefinition, selected).then(
+    const {profile, userID, selectedDefinition, onSetSnacker} = this.props;
+    deleteMany(profile.endpoint, userID, selectedDefinition, selected).then(
       () => {
         onSetSnacker({openSnack: true, snackMsgType: "success", 
           snackMsg: `Deleted ${selectedDefinition}: ${selected}`
@@ -114,7 +114,8 @@ class Listing extends React.Component {
   }
 
   openInNewTab = (selected) => {
-    const {uiConfig} = this.props
+    const {profile, selectedDefinition} = this.props
+    const uiConfig = profile.access[selectedDefinition]
     const {data} = this.state
     const datum = _.find(data, {'_id': selected})
     var template = uiConfig['oin']['path']['template'].slice()
@@ -125,18 +126,19 @@ class Listing extends React.Component {
   }
 
   render() {
-    const { classes, endpoint, selectedDefinition, selectedDefinitionProperty, selectedDefinitionQuery, onSetDefinitionQuery, userID, uiConfig } = this.props;
+    const { classes, selectedDefinition, selectedDefinitionProperty, selectedDefinitionQuery, onSetDefinitionQuery, userID, onSetSnacker, profile } = this.props;
+    const uiConfig = profile ? profile.access[selectedDefinition] : null
     const { data, totalData, openedSingleton, opened, mapViewOpenFlag, chartViewOpenFlag } = this.state;
     return (uiConfig ? [
       <Singleton key={1}
         userID={userID}
         opened={opened}
-        endpoint={endpoint}
+        profile={profile}
         definition={selectedDefinition}
         properties={selectedDefinitionProperty} 
         singleton={openedSingleton} 
         onClose={this.closeSingleton} 
-        onSetSnacker={this.props.onSetSnacker}
+        onSetSnacker={onSetSnacker}
       />,
       uiConfig['map']['enable'] && mapViewOpenFlag ? <div key={2} className={classes.mapRoot}>
         <MapView 
@@ -146,7 +148,7 @@ class Listing extends React.Component {
           openInNewTab={this.openInNewTab}
           openSingleton={this.openSingleton}
           deleteData={this.deleteData}
-          onSetSnacker={this.props.onSetSnacker}
+          onSetSnacker={onSetSnacker}
         />
         <Tooltip title="Back To Table" >
             <IconButton aria-label="Back To Table" className={classes.mapControl} 
