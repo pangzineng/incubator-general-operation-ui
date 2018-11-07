@@ -19,6 +19,7 @@ import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
 import ReactJson from 'react-json-view';
+import FileUpload from '../common/FileUpload';
 import {getOne, postOne} from '../../common/APIUtil';
 var _ = require('lodash'); 
 
@@ -170,7 +171,7 @@ class Singleton extends Component {
     _.sortBy(_.keys(properties)).map( (k, i) => {
       const v = properties[k]
       const vpath = `${ path ? `${path}${index === undefined ? '' : `[${index}]`}.${k}` : k}`
-      const {classes} = this.props
+      const {classes, definition, profile, onSetSnacker} = this.props
       switch (v['type']) {
         case 'object':
           return <Paper key={i} className={classes.singleton}>
@@ -204,6 +205,17 @@ class Singleton extends Component {
             </List>
             </Paper>
         case 'string':
+          // special keyword: `src`, handled as file upload, not fill in value
+          if (k === 'src') {
+            return <FileUpload key={i}
+              presignedUrl={body && body[k] ? body[k] : v['default'] || ""}
+              placeholder={v['description']}
+              onChange={fvalue => this.handleValueChange(vpath, fvalue)}
+              onSetSnacker={onSetSnacker}
+              definition={definition}
+              profile={profile}
+            />
+          }
         case 'number':
           return <TextField key={i}
             select={_.has(v, 'enum')}
