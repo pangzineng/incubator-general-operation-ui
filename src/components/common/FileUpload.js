@@ -53,7 +53,7 @@ class FileUpload extends Component {
 
   upload = (file) => {
     const {onSetSnacker, definition, profile, onChange} = this.props
-    return getHTTP(`${profile.storage.presign}/${`${profile.name}-${definition}`.toLowerCase()}/${file.name}`).then(
+    return getHTTP(`${profile.storage.presign}/${`${profile.name}/${definition}`.toLowerCase()}/${file.name}`).then(
       (presignedUrls) => {
         const [putUrl, getUrl] = JSON.parse(presignedUrls)
         return putHTTP(putUrl, file).then(
