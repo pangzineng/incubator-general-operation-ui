@@ -64,9 +64,12 @@ export const deleteSwagger = (endpoint, userID, path) => new Promise((resolves, 
     request.send()
 })
 
-export const getHTTP = (url) => new Promise((resolves, rejects) => {
+export const getHTTP = (url, userID) => new Promise((resolves, rejects) => {
     const request = new XMLHttpRequest()
     request.open("GET", url)
+    if (userID) {
+        request.setRequestHeader("x-api-user", userID)
+    }
     request.onload = () =>
       (request.status === 200) ?
       resolves(request.response) :

@@ -171,7 +171,7 @@ class Singleton extends Component {
     _.sortBy(_.keys(properties)).map( (k, i) => {
       const v = properties[k]
       const vpath = `${ path ? `${path}${index === undefined ? '' : `[${index}]`}.${k}` : k}`
-      const {classes, definition, profile, onSetSnacker} = this.props
+      const {classes, definition, profile, onSetSnacker, userID} = this.props
       switch (v['type']) {
         case 'object':
           return <Paper key={i} className={classes.singleton}>
@@ -214,6 +214,7 @@ class Singleton extends Component {
               onSetSnacker={onSetSnacker}
               definition={definition}
               profile={profile}
+              userID={userID}
             />
           }
         case 'number':
