@@ -29,46 +29,40 @@ const styles = theme => ({
   
 class TableView extends Component {
 
-    stateReset = {
-        order: 'asc',
-        page: 0,
-        rowsPerPage: 5,
-        selected: []
-    }
-
     constructor(props) {
         super(props);
-        const {selectedDefinitionProperty} = props;
         this.state = {
-          orderBy: _.keys(selectedDefinitionProperty)[0],
-          ...this.stateReset,
+          selected: [],
           definitionSwap: false
         };
     }
 
     componentDidMount () {
-        const {page, rowsPerPage, orderBy, order} = this.state;
-        const {refreshData} = this.props;
-        refreshData(page * rowsPerPage, rowsPerPage, orderBy, order === "asc" ? 1 : -1)
+        const {refreshData, dataCriteria} = this.props;
+        const {page, rowsPerPage, orderBy, order} = dataCriteria;
+        refreshData(page * rowsPerPage, rowsPerPage, orderBy, order)
     }
     
     // TODO: the ugly state value `definitionSwap` is to solve the problem of double update on the component
     // the performance bug is: when switching definition, due to the seperated state/props for the table, the same API will be called twice
     // the async nature of react cause the refresh of state on this component, which contain sorting/paging, 
     // to be behind the refresh of props from parent (Listing.js) which contain the new data, causing componentDidUpdate to be triggered again
-    componentDidUpdate (prevProps, prevState) {
-        const {page, rowsPerPage, orderBy, order, definitionSwap} = this.state;
-        const {selectedDefinition, selectedDefinitionProperty, refreshData, data, totalData} = this.props;
+    componentDidUpdate (prevProps) {
+        const {selectedDefinition, selectedDefinitionProperty, refreshData, data, totalData, dataCriteria, editDataCriteria} = this.props;
+        const {page, rowsPerPage, orderBy, order} = dataCriteria
+        const {definitionSwap} = this.state;
         if (selectedDefinition !== prevProps.selectedDefinition) {
             const sort = _.keys(selectedDefinitionProperty)[0]
-            this.setState({ orderBy: sort, ...this.stateReset, definitionSwap: true }, () => {
-                refreshData(this.stateReset.page * this.stateReset.rowsPerPage, this.stateReset.rowsPerPage, sort, this.stateReset.order === "asc" ? 1 : -1)
+            editDataCriteria({orderBy: sort}, true, () => {
+                this.setState({definitionSwap: true }, () => {
+                    refreshData()
+                })
             })
-        } else if (page !== prevState.page || rowsPerPage !== prevState.rowsPerPage) {
+        } else if (page !== prevProps.dataCriteria.page || rowsPerPage !== prevProps.dataCriteria.rowsPerPage) {
             definitionSwap ? 
                 this.setState({definitionSwap: false}) :
                 this.setState({ selected: [] }, () => {
-                    refreshData(page * rowsPerPage, rowsPerPage, orderBy, order === "asc" ? 1 : -1)
+                    refreshData(page * rowsPerPage, rowsPerPage, orderBy, order)
                 })
         } else if (!_.isEqual(data, prevProps.data) || totalData !== prevProps.totalData){
             this.setState({selected: []})
@@ -97,12 +91,12 @@ class TableView extends Component {
     handleRequestSort = (event, property) => {
         const orderBy = property;
         let order = 'desc';
-    
-        if (this.state.orderBy === property && this.state.order === 'desc') {
+        const {dataCriteria, editDataCriteria} = this.props
+        if (dataCriteria.orderBy === property && dataCriteria.order === 'desc') {
           order = 'asc';
         }
     
-        this.setState({ order, orderBy });
+        editDataCriteria({ order, orderBy });
     };
     
     handleSelectAllClick = (event, checked) => {
@@ -112,16 +106,18 @@ class TableView extends Component {
     isSelected = id => this.state.selected.indexOf(id) !== -1;
 
     handleChangePage = (event, page) => {
-        this.setState({ page, definitionSwap: false });
+        this.setState({ definitionSwap: false });
+        this.props.editDataCriteria({page})
     };
     
     handleChangeRowsPerPage = event => {
-        this.setState({ ...this.stateReset, rowsPerPage: event.target.value, definitionSwap:false });
+        this.setState({definitionSwap:false})
+        this.props.editDataCriteria({rowsPerPage: event.target.value}, true);
     };
     
     render() {
-        const { userID, classes, data, totalData, selectedDefinition, selectedDefinitionQuery, onSetDefinitionQuery, openSingleton, refreshData, deleteData, toggleMapView, toggleChartView, openInNewTab, selectedDefinitionProperty, uiConfig } = this.props;
-        const { selected, order, orderBy, rowsPerPage, page } = this.state;
+        const { userID, classes, data, totalData, selectedDefinition, selectedDefinitionQuery, onSetDefinitionQuery, openSingleton, refreshData, deleteData, toggleMapView, toggleChartView, openInNewTab, selectedDefinitionProperty, uiConfig, dataCriteria } = this.props;
+        const { selected } = this.state;
         return (
             <Paper className={classes.root}>
             <EnhancedTableToolbar 
@@ -144,14 +140,14 @@ class TableView extends Component {
                 <EnhancedTableHead
                     properties={selectedDefinitionProperty}
                     numSelected={selected.length}
-                    order={order}
-                    orderBy={orderBy}
+                    order={dataCriteria.order}
+                    orderBy={dataCriteria.orderBy}
                     onSelectAllClick={this.handleSelectAllClick}
                     onRequestSort={this.handleRequestSort}
                     rowCount={data.length}
                 />
                 <TableBody>
-                {_.orderBy(data, orderBy, order)
+                {_.orderBy(data, dataCriteria.orderBy, dataCriteria.order)
                     .map(n => {
                     const isSelected = this.isSelected(n._id);
                     return (
@@ -193,9 +189,9 @@ class TableView extends Component {
                 className={classes.footer}
                 component="div"
                 count={totalData}
-                rowsPerPageOptions={[5,10,25,totalData]}
-                rowsPerPage={rowsPerPage}
-                page={page}
+                rowsPerPageOptions={[10,25,50]}
+                rowsPerPage={[10,25,50].includes(dataCriteria.rowsPerPage) ? dataCriteria.rowsPerPage: 10}
+                page={dataCriteria.page}
                 backIconButtonProps={{
                     'aria-label': 'Previous Page',
                 }}

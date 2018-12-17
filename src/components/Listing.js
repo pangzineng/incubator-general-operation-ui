@@ -42,6 +42,12 @@ class Listing extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      dataCriteria: {
+        order: 'asc',
+        orderBy: _.keys(props.selectedDefinitionProperty)[0],
+        page: 0,
+        rowsPerPage: 10
+      },
       data: [],
       totalData: 0,
       openedSingleton: null,
@@ -51,6 +57,17 @@ class Listing extends React.Component {
     };
   }
 
+  editDataCriteria = (obj, reset=false, callback=()=>{}) => {
+    const initCriteria = {
+      order: 'asc',
+      orderBy: _.keys(this.props.selectedDefinitionProperty)[0],
+      page: 0,
+      rowsPerPage: 10
+    }
+    const newCriteria = reset ? {...initCriteria, ...obj} : {...this.state.dataCriteria, ...obj}
+    this.setState({ dataCriteria: newCriteria }, callback)
+  }
+
   componentDidUpdate (prevProps) {
       const {selectedDefinition} = this.props;
       if (selectedDefinition !== prevProps.selectedDefinition) {
@@ -58,11 +75,18 @@ class Listing extends React.Component {
       }
   }
 
-  refreshData = (offset=0, limit=5, sort=null, order=1, queryStr=null) => {
+  refreshData = (offset, limit, sort, direction, queryStr=null) => {
     const {profile, selectedDefinition, selectedDefinitionProperty, selectedDefinitionQuery, onSetSnacker} = this.props
-    const orderBy = _.has(selectedDefinitionProperty, sort) ? sort : _.keys(selectedDefinitionProperty)[0]
-    getAll(profile.endpoint, selectedDefinition, offset, limit, orderBy, order, 
-      queryStr ? queryStr : selectedDefinitionQuery ? selectedDefinitionQuery.query : null).then(
+    const {rowsPerPage, page, orderBy, order} = this.state.dataCriteria
+    getAll(
+      profile.endpoint, 
+      selectedDefinition, 
+      offset ? offset : rowsPerPage * page, 
+      limit ? limit : rowsPerPage, 
+      sort ? sort : orderBy || _.keys(selectedDefinitionProperty)[0], 
+      (direction ? direction : order) === 'asc' ? 1 : -1,
+      queryStr ? queryStr : selectedDefinitionQuery ? selectedDefinitionQuery.query : null
+    ).then(
       (response) => {
         const res = JSON.parse(response)
         this.setState({data: res['results'], totalData: res['total']})
@@ -104,13 +128,11 @@ class Listing extends React.Component {
   }
 
   toggleMapView = () => {
-    const {mapViewOpenFlag} = this.state
-    this.setState({mapViewOpenFlag: !mapViewOpenFlag})
+    this.setState(prevState => ({mapViewOpenFlag: !prevState.mapViewOpenFlag}))
   }
 
   toggleChartView = () => {
-    const {chartViewOpenFlag} = this.state
-    this.setState({chartViewOpenFlag: !chartViewOpenFlag})
+    this.setState(prevState => ({chartViewOpenFlag: !prevState.chartViewOpenFlag}))
   }
 
   openInNewTab = (selected) => {
@@ -128,7 +150,7 @@ class Listing extends React.Component {
   render() {
     const { classes, selectedDefinition, selectedDefinitionProperty, selectedDefinitionQuery, onSetDefinitionQuery, userID, onSetSnacker, profile } = this.props;
     const uiConfig = profile ? profile.access[selectedDefinition] : null
-    const { data, totalData, openedSingleton, opened, mapViewOpenFlag, chartViewOpenFlag } = this.state;
+    const { data, totalData, openedSingleton, opened, mapViewOpenFlag, chartViewOpenFlag, dataCriteria } = this.state;
     return (uiConfig ? [
       <Singleton key={1}
         userID={userID}
@@ -185,6 +207,8 @@ class Listing extends React.Component {
         toggleMapView={this.toggleMapView}
         toggleChartView={this.toggleChartView}
         refreshData={this.refreshData}
+        dataCriteria={dataCriteria}
+        editDataCriteria={this.editDataCriteria}
       />
     ]: null);
   }
