@@ -90,13 +90,13 @@ class TableView extends Component {
     
     handleRequestSort = (event, property) => {
         const orderBy = property;
-        let order = 'desc';
-        const {dataCriteria, editDataCriteria} = this.props
-        if (dataCriteria.orderBy === property && dataCriteria.order === 'desc') {
-          order = 'asc';
+        let order = 'asc';
+        const {dataCriteria, editDataCriteria, refreshData} = this.props
+        if (dataCriteria.orderBy === property && dataCriteria.order === 'asc') {
+          order = 'desc';
         }
     
-        editDataCriteria({ order, orderBy });
+        editDataCriteria({ order, orderBy }, false, refreshData);
     };
     
     handleSelectAllClick = (event, checked) => {
@@ -147,7 +147,7 @@ class TableView extends Component {
                     rowCount={data.length}
                 />
                 <TableBody>
-                {_.orderBy(data, dataCriteria.orderBy, dataCriteria.order)
+                {data
                     .map(n => {
                     const isSelected = this.isSelected(n._id);
                     return (
