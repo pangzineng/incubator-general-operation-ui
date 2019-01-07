@@ -4,8 +4,8 @@ import Dropzone from 'react-dropzone'
 import DeleteIcon from '@material-ui/icons/Delete';
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import Button from '@material-ui/core/Button';
-import ExpandLess from '@material-ui/icons/ExpandLess';
-import ExpandMore from '@material-ui/icons/ExpandMore';
+import Attachment from '@material-ui/icons/Attachment';
+import AttachFile from '@material-ui/icons/AttachFile';
 import Collapse from '@material-ui/core/Collapse';
 import TextField from '@material-ui/core/TextField';
 import IconButton from '@material-ui/core/IconButton';
@@ -91,32 +91,38 @@ class FileUpload extends Component {
     }
   }
 
-  handleClick = () => {
+  handleToggle = () => {
     this.setState(prevState => ({open: !prevState.open}))
   }
 
+  handleTextChange = event => {
+    const {onChange} = this.props
+    onChange(event.target.value)
+}
+
   render(){
     const {open, files} = this.state
-    const {classes, presignedUrl, placeholder} = this.props
+    const {classes, presignedUrl, placeholder, label} = this.props
     return (
       <div className={classes.root}>
         <TextField 
           InputProps={{
-            readOnly: true,
+            readOnly: open,
             endAdornment: (
               <InputAdornment variant="filled" position="end">
                 <IconButton
-                  onClick={this.handleClick}
+                  onClick={this.handleToggle}
                 >
-                  {open ? <ExpandLess /> : <ExpandMore />}
+                  {open ? <Attachment /> : <AttachFile />}
                 </IconButton>
               </InputAdornment>
             )
           }}
+          onChange={this.handleTextChange}
           fullWidth
           margin="normal"
           value={presignedUrl || ""}
-          label={'src'}
+          label={label}
           placeholder={placeholder}
           helperText="upload file to generate src"
           />

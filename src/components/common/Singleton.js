@@ -206,8 +206,9 @@ class Singleton extends Component {
             </Paper>
         case 'string':
           // special keyword: `src`, handled as file upload, not fill in value
-          if (k === 'src') {
+          if (k === 'src' || k === 'url' || k === 'uri') {
             return <FileUpload key={i}
+              label={k}
               presignedUrl={body && body[k] ? body[k] : v['default'] || ""}
               placeholder={v['description']}
               onChange={fvalue => this.handleValueChange(vpath, fvalue)}
@@ -217,6 +218,7 @@ class Singleton extends Component {
               userID={userID}
             />
           }
+          // do not `break` here, to allow default 'string' case and all 'number' case to be handled the same way
         case 'number':
           return <TextField key={i}
             select={_.has(v, 'enum')}
