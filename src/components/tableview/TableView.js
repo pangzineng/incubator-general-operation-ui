@@ -170,7 +170,7 @@ class TableView extends Component {
                                 <ReactJson 
                                 src={n[nk]} 
                                 name={false}
-                                collapsed={true}
+                                collapsed={false}
                                 collapseStringsAfterLength={20}
                                 enableClipboard={false}
                                 displayObjectSize={false}
