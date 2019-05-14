@@ -18,9 +18,11 @@ import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
+import Typography from '@material-ui/core/Typography';
 import ReactJson from 'react-json-view';
+import Select from 'react-select';
 import FileUpload from '../common/FileUpload';
-import {getOne, postOne} from '../../common/APIUtil';
+import {getOne, postOne, getAll} from '../../common/APIUtil';
 var _ = require('lodash'); 
 
 const styles = theme => ({
@@ -52,7 +54,32 @@ const styles = theme => ({
     groupSecondary: {
       fontStyle: 'italic',
       fontSize: 'small'
-    }
+    },
+    linkageValueContainer: {
+      display: 'flex',
+      flexWrap: 'wrap',
+      flex: 1,
+      alignItems: 'center',
+      overflow: 'hidden',
+    },
+    linkageNoOptionsMessage: {
+      padding: `${theme.spacing.unit}px ${theme.spacing.unit * 2}px`,
+    },
+    linkageSingleValue: {
+      fontSize: 16,
+    },
+    linkagePlaceholder: {
+      position: 'absolute',
+      left: 2,
+      fontSize: 16,
+    },
+    linkagePaper: {
+      position: 'absolute',
+      zIndex: 1,
+      marginTop: theme.spacing.unit,
+      left: 0,
+      right: 0,
+    }  
 });
   
 class Singleton extends Component {
@@ -62,6 +89,8 @@ class Singleton extends Component {
 
     this.state = {
       objectId: props.singleton,
+      linkageCache: {},
+      linkageCacheDownloadFlag: {},
       body: this.getInitBody(props.properties),
       newFlag: props.singleton ? false : true,
       editorMode: 'form'
@@ -138,6 +167,29 @@ class Singleton extends Component {
     }
   }
 
+  // ex. Select from existing APIs $api_name$
+  loadLinkageCache = (cacheKey) => {
+    const {linkageCache, linkageCacheDownloadFlag} = this.state
+    if (!linkageCacheDownloadFlag[cacheKey]){
+      if (!linkageCache[cacheKey]){
+        this.setState({linkageCacheDownloadFlag: Object.assign(linkageCacheDownloadFlag, {[cacheKey]: true})}, () => {
+          const key = cacheKey.split('_')[0]
+          const field = cacheKey.split('_')[1]
+          const {profile} = this.props
+          getAll(profile.endpoint, key, 0, 500, 'created_ts', -1, null, `{"${field}":1}`).then(
+            (response) => {
+              const cache = JSON.parse(response)['results'].map(data => ({value: data._id, label: data[field]}))
+              this.setState(prevState => ({
+                linkageCache: Object.assign(prevState.linkageCache, {[cacheKey]: cache}),
+                linkageCacheDownloadFlag: Object.assign(linkageCacheDownloadFlag, {[cacheKey]: false})
+              }))
+            }
+          )
+        })
+      }
+    }
+  }
+
   handleCommonStateChange = (name, value) => {
     this.setState({[name]: value})
   }
@@ -172,6 +224,7 @@ class Singleton extends Component {
       const v = properties[k]
       const vpath = `${ path ? `${path}${index === undefined ? '' : `[${index}]`}.${k}` : k}`
       const {classes, definition, profile, onSetSnacker, userID} = this.props
+      const {linkageCache} = this.state
       switch (v['type']) {
         case 'object':
           return <Paper key={i} className={classes.singleton}>
@@ -216,6 +269,39 @@ class Singleton extends Component {
               definition={definition}
               profile={profile}
               userID={userID}
+            />
+          }
+          // special description postfix `$`, to handled as foreign key linkage (dropdown autocomplete on specified field, store as _id), not fill in value
+          // e.g. Select from existing APIs $api_name$
+          if (v['description'] && v['description'].trim().endsWith('$')){
+            const cacheKey = v['description'].split('$')[v['description'].split('$').length-2]
+            this.loadLinkageCache(cacheKey)
+            return <Select key={i}
+              classes={classes}
+              options={linkageCache[cacheKey] || []}
+              components={{
+                Menu: (props) => <Paper square className={props.selectProps.classes.linkagePaper} {...props.innerProps}>
+                    {props.children}
+                  </Paper>,
+                NoOptionsMessage: (props) => <Typography  color="textSecondary"  className={props.selectProps.classes.linkageNoOptionsMessage}  {...props.innerProps}>
+                    {props.children}
+                  </Typography>,
+                Option: (props) => <MenuItem buttonRef={props.innerRef} selected={props.isFocused} component="div" style={{   fontWeight: props.isSelected ? 500 : 400, }} {...props.innerProps}>
+                    {props.children}
+                  </MenuItem>,
+                Placeholder: (props) => <Typography color="textSecondary" className={props.selectProps.classes.linkagePlaceholder} {...props.innerProps}>
+                    {props.children}
+                  </Typography>,
+                SingleValue: (props) => <Typography className={props.selectProps.classes.linkageSingleValue} {...props.innerProps}>
+                    {props.children}
+                  </Typography>,
+                ValueContainer: (props) => <div className={props.selectProps.classes.linkageValueContainer}>{props.children}</div>,
+              }}
+              value={linkageCache[cacheKey] ? linkageCache[cacheKey].filter(suggestion => suggestion.value === (body && body[k] ? body[k] : v['default'] || ""))[0] : ""}
+              onChange={svalue => this.handleValueChange(vpath, svalue ? svalue.value : null)}
+              placeholder={v['description'].split('$')[0]}
+              isClearable
+              isSearchable
             />
           }
           // do not `break` here, to allow default 'string' case and all 'number' case to be handled the same way

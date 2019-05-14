@@ -35,13 +35,11 @@ class EnhancedTableHead extends Component {
               return (
                 <TableCell
                   key={propertyKey}
-                  numeric={properties[propertyKey].type === 'number'}
-                  // padding={column.disablePadding ? 'none' : 'default'}
+                  align={properties[propertyKey].type === 'number' ? 'center' : 'inherit'}
                   sortDirection={orderBy === propertyKey ? order : false}
                 >
                   <Tooltip
                     title="Sort"
-                    // placement={column.numeric ? 'bottom-end' : 'bottom-start'}
                     enterDelay={300}
                   >
                     <TableSortLabel

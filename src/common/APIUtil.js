@@ -2,9 +2,9 @@ export const getOne = (endpoint, definition, id) => {
     return getSwagger(endpoint, `${definition}/$${id}`)
 }
 
-export const getAll = (endpoint, definition, offset, limit, sort, order, queryStr) => {
+export const getAll = (endpoint, definition, offset, limit, sort, order, queryStr, projectionStr) => {
     return getSwagger(endpoint, definition, 
-        `${queryStr ? `q=${encodeURIComponent(queryStr)}&`:""}offset=${offset}&limit=${limit}&sort=${sort}&order=${order}`)
+        `${queryStr ? `q=${encodeURIComponent(queryStr)}&`:""}${projectionStr ? `p=${encodeURIComponent(projectionStr)}&`:""}offset=${offset}&limit=${limit}&sort=${sort}&order=${order}`)
 }
 
 export const postOne = (endpoint, userID, definition, id, body) => {
