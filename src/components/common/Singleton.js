@@ -178,7 +178,7 @@ class Singleton extends Component {
           const {profile} = this.props
           getAll(profile.endpoint, key, 0, 500, 'created_ts', -1, null, `{"${field}":1}`).then(
             (response) => {
-              const cache = JSON.parse(response)['results'].map(data => ({value: data._id, label: data[field]}))
+              const cache = JSON.parse(response)['results'].map(data => ({value: data, label: data[field]}))
               this.setState(prevState => ({
                 linkageCache: Object.assign(prevState.linkageCache, {[cacheKey]: cache}),
                 linkageCacheDownloadFlag: Object.assign(linkageCacheDownloadFlag, {[cacheKey]: false})
